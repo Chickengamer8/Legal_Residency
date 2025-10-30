@@ -1,0 +1,119 @@
+# Unity YAML files should use LF line endings
+*.meta eol=lf
+*.unity eol=lf
+*.asset eol=lf
+*.prefab eol=lf
+*.mat eol=lf
+*.anim eol=lf
+*.controller eol=lf
+*.overrideController eol=lf
+*.physicMaterial eol=lf
+*.physicsMaterial2D eol=lf
+*.playable eol=lf
+*.mask eol=lf
+*.brush eol=lf
+*.flare eol=lf
+*.fontsettings eol=lf
+*.spriteatlas eol=lf
+*.terrainlayer eol=lf
+*.mixer eol=lf
+*.shadervariants eol=lf
+*.preset eol=lf
+
+# Unity text-based assets
+*.cs text=auto
+*.js text=auto
+*.boo text=auto
+*.compute text=auto
+*.cginc text=auto
+*.hlsl text=auto
+*.shader text=auto
+*.xml text=auto
+*.json text=auto
+*.txt text=auto
+*.md text=auto
+
+# Unity binary assets (do not normalize line endings)
+*.cubemap binary
+*.unitypackage binary
+
+# Image formats
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.bmp binary
+*.tga binary
+*.tiff binary
+*.tif binary
+*.iff binary
+*.pict binary
+*.dds binary
+*.xcf binary
+*.leo binary
+*.kra binary
+*.kpp binary
+*.clip binary
+*.webm binary
+*.webp binary
+*.svg binary
+*.svgz binary
+*.psd binary
+*.afphoto binary
+*.afdesign binary
+
+# Audio formats
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.aif binary
+*.aiff binary
+*.mod binary
+*.it binary
+*.s3m binary
+*.xm binary
+
+# Video formats
+*.mov binary
+*.avi binary
+*.asf binary
+*.mpg binary
+*.mpeg binary
+*.mp4 binary
+*.flv binary
+*.ogv binary
+
+# 3D formats
+*.3ds binary
+*.3dm binary
+*.ma binary
+*.mb binary
+*.obj binary
+*.max binary
+*.blend binary
+*.dae binary
+*.fbx binary
+*.jas binary
+*.lws binary
+*.lxo binary
+*.c4d binary
+*.skp binary
+
+# Executables
+*.exe binary
+*.dll binary
+*.so binary
+*.pdb binary
+*.mdb binary
+
+# Packed Addressables
+*.bin binary
+
+# Crash logs
+*.stackdump binary
+
+# Fmod cache
+*.cache binary
+
+# Autodesk Fbx converter
+*.fbm binary
