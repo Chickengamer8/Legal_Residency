@@ -2,18 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LightInteractionDetector : MonoBehaviour
+public class SwitchBoardInteractionDetector : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("IT'S UNSAFE!!!!"); 
+            UIManager.instance.ShowLightBoardInstruction();
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        Debug.Log("IT'S SAFE AGAIN!");
+        if (other.CompareTag("Player"))
+        {
+            UIManager.instance.HideLightBoardInstruction();
+        }
     }
 }
