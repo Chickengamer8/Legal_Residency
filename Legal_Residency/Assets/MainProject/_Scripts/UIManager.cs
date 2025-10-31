@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using TMPro;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -17,6 +18,10 @@ public class UIManager : MonoBehaviour
     public float moveDuration = 2f;      // Duration of the sliding animation
     public float moveDistance = 500f;   // Distance the popup moves off-screen
 
+    [SerializeField]
+    private float fadeDuration = 1f;
+    [SerializeField]
+    private Image fadeImage;
 
     private RectTransform instructionPopupRectTransform;
     private Vector2 originalPosition;
@@ -99,6 +104,42 @@ public class UIManager : MonoBehaviour
             case InteractionType.DrawingCurtains:
                 instructionPopupText.text = "Press E to draw curtains";
                 break;
+            case InteractionType.HidingInBasket:
+                instructionPopupText.text = "Press E to hide in basket";
+                break;
+            case InteractionType.InteractiveObject:
+                instructionPopupText.text = "Press E to turn this on";
+                break;
+            default:
+                break;
         }
+    }
+
+    public IEnumerator FadeOut()
+    {
+        // Fade to black
+        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        {
+            float normalizedTime = t / fadeDuration;
+            Color color = fadeImage.color;
+            color.a = Mathf.Lerp(0, 1, normalizedTime);
+            fadeImage.color = color;
+            yield return null;
+        }
+        fadeImage.color = new Color(0, 0, 0, 1);
+    }
+
+    public IEnumerator FadeIn()
+    {
+        // Fade from black
+        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        {
+            float normalizedTime = t / fadeDuration;
+            Color color = fadeImage.color;
+            color.a = Mathf.Lerp(1, 0, normalizedTime);
+            fadeImage.color = color;
+            yield return null;
+        }
+        fadeImage.color = new Color(0, 0, 0, 0);
     }
 }
