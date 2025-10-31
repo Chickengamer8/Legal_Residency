@@ -58,6 +58,7 @@ public class InteractionManager : MonoBehaviour
     {
         playerInRange = true;
         currentLight = light;
+        currentCurtain = curtains;
         currentInteractionType = interactionType;
     }
 
@@ -98,5 +99,6 @@ public class InteractionManager : MonoBehaviour
     {
         var animator = currentCurtain.GetComponent<Animator>();
         animator.SetTrigger("draw");
+        SwitchOffLight();
     }
 }
