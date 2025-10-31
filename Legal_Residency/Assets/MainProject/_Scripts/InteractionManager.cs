@@ -1,7 +1,9 @@
+using StarterAssets;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class InteractionManager : MonoBehaviour
 {
@@ -9,27 +11,32 @@ public class InteractionManager : MonoBehaviour
 
     public PlayerInput playerInput;
 
+    // Event for AI system
+    public static event Action<Vector3> OnPlayerInteraction;
+
     [HideInInspector]
     public InteractionType currentInteractionType;
     [HideInInspector]
     public GameObject currentLight;
     public GameObject currentCurtain;
+    public GameObject currentBasket;
+    public AudioClip currentAudio;
 
     [HideInInspector]
     public bool playerInRange;
 
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
             instance = this;
         else
-            Destroy(this);
+            Destroy(gameObject);
     }
+
     private void Start()
     {
         currentLight = null;
         playerInRange = false;
-
         currentInteractionType = InteractionType.None;
     }
 
@@ -37,12 +44,8 @@ public class InteractionManager : MonoBehaviour
     {
         var switchAction = playerInput.actions.FindAction("Switch");
 
-        // Debug the action state
-        //Debug.Log($"Switch action - IsPressed: {switchAction.IsPressed()}, Triggered: {switchAction.triggered}");
-
         if (switchAction.triggered)
         {
-            //Debug.Log("Switch action triggered!");
             if (playerInRange)
             {
                 CheckAndTriggerInteraction();
@@ -54,10 +57,14 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-    public void SetupInteraction(InteractionType interactionType, GameObject light = null, GameObject curtains = null)
+    public void SetupInteraction(InteractionType interactionType, GameObject light = null, GameObject curtains = null,
+        GameObject basket = null, AudioClip audioClip = null)
     {
         playerInRange = true;
         currentLight = light;
+        currentCurtain = curtains;
+        currentBasket = basket;
+        currentAudio = audioClip;
         currentInteractionType = interactionType;
     }
 
@@ -66,6 +73,8 @@ public class InteractionManager : MonoBehaviour
         playerInRange = false;
         currentLight = null;
         currentCurtain = null;
+        currentBasket = null;
+        currentAudio = null;
         currentInteractionType = InteractionType.None;
     }
 
@@ -79,7 +88,12 @@ public class InteractionManager : MonoBehaviour
             case InteractionType.DrawingCurtains:
                 DrawCurtains();
                 break;
-
+            case InteractionType.HidingInBasket:
+                HideInBasket();
+                break;
+            case InteractionType.InteractiveObject:
+                InteractWithObject();
+                break;
             default:
                 break;
         }
@@ -91,12 +105,112 @@ public class InteractionManager : MonoBehaviour
         {
             currentLight.SetActive(false);
             UIManager.instance.HideInstructionPopup();
+
+            // Trigger AI event - tenant might investigate
+            OnPlayerInteraction?.Invoke(currentLight.transform.position);
         }
     }
 
     private void DrawCurtains()
     {
-        var animator = currentCurtain.GetComponent<Animator>();
-        animator.SetTrigger("draw");
+        if (currentCurtain != null)
+        {
+            var animator = currentCurtain.GetComponent<Animator>();
+            if (animator != null)
+            {
+                animator.SetTrigger("draw");
+            }
+
+            // Trigger AI event
+            OnPlayerInteraction?.Invoke(currentCurtain.transform.position);
+        }
+        SwitchOffLight();
+    }
+
+    private void HideInBasket()
+    {
+        UIManager.instance.HideInstructionPopup();
+
+        // Trigger AI event before hiding
+        if (currentBasket != null)
+        {
+            OnPlayerInteraction?.Invoke(currentBasket.transform.position);
+        }
+
+        StartCoroutine(HideInBasketSequence());
+    }
+
+    private IEnumerator HideInBasketSequence()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        ThirdPersonController playerController = null;
+        CharacterController characterController = null;
+
+        if (player != null && currentBasket != null)
+        {
+            // Store components and disable movement
+            playerController = player.GetComponent<ThirdPersonController>();
+            characterController = player.GetComponent<CharacterController>();
+
+            if (playerController != null)
+                playerController.enabled = false;
+            if (characterController != null)
+                characterController.enabled = false;
+
+            // 1. Fade out to black
+            yield return StartCoroutine(UIManager.instance.FadeOut());
+
+            // 2. Move and orient player while screen is BLACK
+            Transform hidePosition = currentBasket.transform.Find("HidePosition");
+
+            if (hidePosition != null)
+            {
+                player.transform.position = hidePosition.position;
+                player.transform.rotation = hidePosition.rotation;
+            }
+            else
+            {
+                Vector3 basketPosition = currentBasket.transform.position;
+
+                // Position inside basket
+                player.transform.position = new Vector3(
+                    basketPosition.x,
+                    basketPosition.y + 0.5f, // Adjust this based on your basket height
+                    basketPosition.z
+                );
+
+                // Keep player upright
+                player.transform.rotation = Quaternion.identity;
+            }
+
+            // 3. Wait a moment while screen stays black
+            yield return new WaitForSeconds(0.2f);
+
+            // 4. Fade back in
+            yield return StartCoroutine(UIManager.instance.FadeIn());
+
+            // 5. Re-enable components
+            if (characterController != null)
+                characterController.enabled = true;
+            if (playerController != null)
+                playerController.enabled = true;
+        }
+    }
+
+    private void InteractWithObject()
+    {
+        Debug.Log("Interacting with object");
+        if (currentLight != null)
+        {
+            currentLight.SetActive(true);
+
+            // Trigger AI event for interactive objects
+            OnPlayerInteraction?.Invoke(currentLight.transform.position);
+        }
+
+        if (currentAudio != null)
+        {
+            AudioManager.instance.PlayAudio(currentAudio);
+        }
     }
 }

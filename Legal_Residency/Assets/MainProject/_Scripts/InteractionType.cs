@@ -7,6 +7,8 @@ public enum InteractionType
     None,
     DrawingCurtains,
     FlickingSwitch,
+    HidingInBasket,
+    InteractiveObject,
     GettingSeen,
     HidingAsPumpkin,
     HidingRegularly,
