@@ -2,15 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
 
-    //public PlayerInput playerInput;
-
+    [Header("Instruction Popup Variables")]
     public GameObject instructionPopup;
     public Animator instructionPopupAnim;
+    public TMP_Text instructionPopupText; 
 
     [Header("Popup Animation")]
     public float moveDuration = 2f;      // Duration of the sliding animation
@@ -19,6 +20,8 @@ public class UIManager : MonoBehaviour
 
     private RectTransform instructionPopupRectTransform;
     private Vector2 originalPosition;
+
+    public GameObject spotLight;
 
 
     [SerializeField]
@@ -44,19 +47,11 @@ public class UIManager : MonoBehaviour
         isInstructionOn = false;
     }
 
-    private void Update()
-    {
-        //if (playerInput.actions.FindAction("Build").triggered)
-        //{
-        //    if (playerInRange)
-        //        SwitchOffLight();
-        //}
-    }
-
-    public void ShowLightBoardInstruction()
+    public void ShowInstructionPopup(InteractionType interactionType)
     {
         if (!isInstructionOn)
         {
+            AssignInstructionText(interactionType);
             instructionPopup.SetActive(true);
             isInstructionOn = true;
 
@@ -71,7 +66,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void HideLightBoardInstruction()
+    public void HideInstructionPopup()
     {
         if (isInstructionOn)
         {
@@ -88,13 +83,22 @@ public class UIManager : MonoBehaviour
                 .SetEase(Ease.Flash)
                 .OnComplete(() =>
                 {
+                    instructionPopupText.text = "";
                     instructionPopup.SetActive(false);
                 });
         }
     }
 
-    private void SwitchOffLight()
+    private void AssignInstructionText(InteractionType interactionType)
     {
-
+        switch (interactionType)
+        {
+            case InteractionType.FlickingSwitch:
+                instructionPopupText.text = "Press E to turn off light";
+                break;
+            case InteractionType.DrawingCurtains:
+                instructionPopupText.text = "Press E to draw curtains";
+                break;
+        }
     }
 }
