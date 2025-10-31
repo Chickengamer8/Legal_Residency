@@ -3,12 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class InteractionManager : MonoBehaviour
 {
     public static InteractionManager instance;
 
     public PlayerInput playerInput;
+
+    // Event for AI system
+    public static event Action<Vector3> OnPlayerInteraction;
 
     [HideInInspector]
     public InteractionType currentInteractionType;
@@ -23,16 +27,16 @@ public class InteractionManager : MonoBehaviour
 
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
             instance = this;
         else
-            Destroy(this);
+            Destroy(gameObject);
     }
+
     private void Start()
     {
         currentLight = null;
         playerInRange = false;
-
         currentInteractionType = InteractionType.None;
     }
 
@@ -40,12 +44,8 @@ public class InteractionManager : MonoBehaviour
     {
         var switchAction = playerInput.actions.FindAction("Switch");
 
-        // Debug the action state
-        //Debug.Log($"Switch action - IsPressed: {switchAction.IsPressed()}, Triggered: {switchAction.triggered}");
-
         if (switchAction.triggered)
         {
-            //Debug.Log("Switch action triggered!");
             if (playerInRange)
             {
                 CheckAndTriggerInteraction();
@@ -64,8 +64,8 @@ public class InteractionManager : MonoBehaviour
         currentLight = light;
         currentCurtain = curtains;
         currentBasket = basket;
-        currentInteractionType = interactionType;
         currentAudio = audioClip;
+        currentInteractionType = interactionType;
     }
 
     public void DisconnectInteraction()
@@ -105,21 +105,41 @@ public class InteractionManager : MonoBehaviour
         {
             currentLight.SetActive(false);
             UIManager.instance.HideInstructionPopup();
+
+            // Trigger AI event - tenant might investigate
+            OnPlayerInteraction?.Invoke(currentLight.transform.position);
         }
     }
 
     private void DrawCurtains()
     {
-        var animator = currentCurtain.GetComponent<Animator>();
-        animator.SetTrigger("draw");
+        if (currentCurtain != null)
+        {
+            var animator = currentCurtain.GetComponent<Animator>();
+            if (animator != null)
+            {
+                animator.SetTrigger("draw");
+            }
+
+            // Trigger AI event
+            OnPlayerInteraction?.Invoke(currentCurtain.transform.position);
+        }
         SwitchOffLight();
     }
 
     private void HideInBasket()
     {
         UIManager.instance.HideInstructionPopup();
+
+        // Trigger AI event before hiding
+        if (currentBasket != null)
+        {
+            OnPlayerInteraction?.Invoke(currentBasket.transform.position);
+        }
+
         StartCoroutine(HideInBasketSequence());
     }
+
     private IEnumerator HideInBasketSequence()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -159,10 +179,8 @@ public class InteractionManager : MonoBehaviour
                     basketPosition.z
                 );
 
-                // Keep player upright (don't rotate)
+                // Keep player upright
                 player.transform.rotation = Quaternion.identity;
-                // Or face a specific direction:
-                // player.transform.rotation = Quaternion.LookRotation(Vector3.forward);
             }
 
             // 3. Wait a moment while screen stays black
@@ -182,7 +200,17 @@ public class InteractionManager : MonoBehaviour
     private void InteractWithObject()
     {
         Debug.Log("Interacting with object");
-        currentLight.SetActive(true);
-        AudioManager.instance.PlayAudio(currentAudio);
+        if (currentLight != null)
+        {
+            currentLight.SetActive(true);
+
+            // Trigger AI event for interactive objects
+            OnPlayerInteraction?.Invoke(currentLight.transform.position);
+        }
+
+        if (currentAudio != null)
+        {
+            AudioManager.instance.PlayAudio(currentAudio);
+        }
     }
 }
